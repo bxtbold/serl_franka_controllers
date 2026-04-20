@@ -1,0 +1,24 @@
+<launch>
+  <arg name="robot_ip" />
+  <arg name="load_gripper" default="true" />
+  <arg name="target_joint_positions"
+       default="[0.09908148, -0.08514409, -0.09948055, -2.39459327, -0.01271878, 2.30942455, 0.79499885]" />
+
+  <include file="$(find franka_control)/launch/franka_control.launch">
+    <arg name="robot_ip" value="$(arg robot_ip)" />
+    <arg name="load_gripper" value="$(arg load_gripper)" />
+  </include>
+
+  <rosparam command="load"
+            file="$(find serl_franka_controllers)/config/serl_franka_controllers.yaml" />
+
+  <rosparam param="target_joint_positions">
+    $(arg target_joint_positions)
+  </rosparam>
+
+  <node name="controller_spawner"
+        pkg="controller_manager"
+        type="spawner"
+        output="screen"
+        args="joint_position_controller cartesian_impedance_controller --stopped"/>
+</launch>
