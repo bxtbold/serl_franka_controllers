@@ -12,7 +12,7 @@
   <rosparam command="load"
             file="$(find serl_franka_controllers)/config/serl_franka_controllers.yaml" />
 
-  <rosparam param="target_joint_positions">
+  <rosparam param="target_joint_positions" subst_value="true">
     $(arg target_joint_positions)
   </rosparam>
 
