@@ -66,13 +66,44 @@ void JointPositionController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
   elapsed_time_ += period;
 
+  const double T = 5.0;
+  double t = elapsed_time_.toSec();
+
+  // Clamp time (prevents overshoot)
+  if (t > T) t = T;
+
+  double s = t / T;
+
+  // Quintic time scaling
+  double s2 = s * s;
+  double s3 = s2 * s;
+  double s4 = s3 * s;
+  double s5 = s4 * s;
+  double s_curve = 10*s3 - 15*s4 + 6*s5;
+
+  // Derivative (for velocity limiting)
+  double ds_dt = (30*s2 - 60*s3 + 30*s4) / T;
+
+  // Conservative velocity limit (rad/s)
+  const double max_vel = 1.0;  // keep well below Franka limits
+
   for (size_t i = 0; i < 7; ++i) {
-    if (elapsed_time_.toSec() > 10){
-      position_joint_handles_[i].setCommand(reset_pose_[i]); // - delta_angle);
+    double delta = reset_pose_[i] - initial_pose_[i];
+
+    // Desired position
+    double q_des = initial_pose_[i] + delta * s_curve;
+
+    // Estimated velocity
+    double qd_des = delta * ds_dt;
+
+    // Velocity limiting (prevents hidden discontinuities)
+    if (std::abs(qd_des) > max_vel) {
+      double scale = max_vel / std::abs(qd_des);
+      q_des = position_joint_handles_[i].getPosition() +
+              qd_des * scale * period.toSec();
     }
-    else {
-      position_joint_handles_[i].setCommand( ((elapsed_time_.toSec()) / 10.0) * reset_pose_[i] + ((10 - elapsed_time_.toSec()) / 10.0) * initial_pose_[i]);
-    }
+
+    position_joint_handles_[i].setCommand(q_des);
   }
 }
 
