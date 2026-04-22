@@ -26,6 +26,9 @@ class JointPositionController : public controller_interface::MultiInterfaceContr
   hardware_interface::PositionJointInterface* position_joint_interface_;
   std::vector<hardware_interface::JointHandle> position_joint_handles_;
   ros::Duration elapsed_time_;
+  ros::Duration startup_elapsed_;
+  bool motion_initialized_{false};
+  double startup_hold_time_{0.2};
   std::array<double, 7> initial_pose_{};
   std::array<double, 7> reset_pose_{};
 };
