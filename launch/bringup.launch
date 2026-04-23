@@ -3,10 +3,12 @@
   <arg name="load_gripper" default="true" />
   <arg name="target_joint_positions"
        default="[0.09908148, -0.08514409, -0.09948055, -2.39459327, -0.01271878, 2.30942455, 0.79499885]" />
+  <arg name="franka_control_config" default="$(find serl_franka_controllers)/config/franka_control_node.yaml" />
 
-  <include file="$(find franka_control)/launch/franka_control.launch">
+  <include file="$(find serl_franka_controllers)/launch/franka_control.launch">
     <arg name="robot_ip" value="$(arg robot_ip)" />
     <arg name="load_gripper" value="$(arg load_gripper)" />
+    <arg name="franka_control_config" value="$(arg franka_control_config)" />
   </include>
 
   <rosparam command="load"
